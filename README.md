@@ -1,2 +1,5 @@
-# zcashd-wallet
-OpenBazaar plugin for a zcashd based wallet
+# hushd-wallet
+
+OpenBazaar plugin for a HUSH based wallet
+
+https://myhush.org
