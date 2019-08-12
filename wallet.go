@@ -72,10 +72,10 @@ func NewZcashdWallet(mnemonic string, params *chaincfg.Params, repoPath string, 
 	mPubKey, _ := mPrivKey.Neuter()
 
 	if params.Name == chaincfg.TestNet3Params.Name || params.Name == chaincfg.RegressionNetParams.Name {
-		connCfg.Host = "localhost:18232"
+		connCfg.Host = "localhost:18032"
 	}
 
-	dataDir := path.Join(repoPath, "zcash")
+	dataDir := path.Join(repoPath, "komodo","HUSH3")
 
 	var err error
 	connCfg.User, connCfg.Pass, err = GetCredentials(repoPath)
@@ -120,9 +120,9 @@ func (w *ZcashdWallet) MainNetworkEnabled() bool {
 }
 
 func GetCredentials(repoPath string) (username, password string, err error) {
-	p := path.Join(repoPath, "zcash", "zcash.conf")
+	p := path.Join(repoPath, "komodo", "HUSH3", "HUSH3.conf")
 	if _, err := os.Stat(p); os.IsNotExist(err) {
-		dataDir := path.Join(repoPath, "zcash")
+		dataDir := path.Join(repoPath, "HUSH3")
 		os.Mkdir(dataDir, os.ModePerm)
 
 		r := make([]byte, 32)
@@ -164,7 +164,7 @@ func GetCredentials(repoPath string) (username, password string, err error) {
 			}
 		}
 		if !unExists || !pwExists {
-			return "", "", errors.New("Zcash config file does not contain a username and password")
+			return "", "", errors.New("HUSH config file does not contain a username and password")
 		}
 
 		if err := scanner.Err(); err != nil {
@@ -184,11 +184,11 @@ func (w *ZcashdWallet) BuildArguments(rescan bool) []string {
 	var notify string
 	switch runtime.GOOS {
 	case "windows":
-		notify = `powershell.exe Invoke-WebRequest -Uri http://localhost:8330/ -Method POST -Body %s`
+		notify = `powershell.exe Invoke-WebRequest -Uri http://localhost:18331/ -Method POST -Body %s`
 	default:
-		notify = `curl -d %s http://localhost:8330/`
+		notify = `curl -d %s http://localhost:18331/`
 	}
-	args := []string{"-walletnotify=" + notify, "-server", "-wallet=ob-wallet.dat", "-conf=" + path.Join(w.repoPath, "zcash.conf")}
+	args := []string{"-walletnotify=" + notify, "-server", "-wallet=ob-wallet.dat", "-conf=" + path.Join(w.repoPath, "HUSH3.conf")}
 	if rescan {
 		args = append(args, "-rescan")
 	}
@@ -221,7 +221,7 @@ func (w *ZcashdWallet) Start() {
 	ticker := time.NewTicker(time.Second * 30)
 	go func() {
 		for range ticker.C {
-			log.Fatal("Failed to connect to zcashd")
+			log.Fatal("Failed to connect to hushd")
 		}
 	}()
 	for {
@@ -232,7 +232,7 @@ func (w *ZcashdWallet) Start() {
 		time.Sleep(time.Second)
 	}
 	ticker.Stop()
-	log.Info("Connected to zcashd")
+	log.Info("Connected to hushd")
 	close(w.initChan)
 	go w.addQueuedWatchAddresses()
 }
@@ -254,9 +254,9 @@ func (w *ZcashdWallet) shutdownIfActive() {
 
 func (w *ZcashdWallet) CurrencyCode() string {
 	if w.MainNetworkEnabled() {
-		return "zec"
+		return "hush"
 	} else {
-		return "tzec"
+		return "tush"
 	}
 }
 
@@ -642,7 +642,7 @@ func (w *ZcashdWallet) buildTx(amount int64, addr btc.Address, feeLevel wallet.F
 			authoredTx.Tx, i, prevOutScript, txscript.SigHashAll, getKey,
 			getScript, txIn.SignatureScript)
 		if err != nil {
-			return nil, errors.New("Failed to sign transaction")
+			return nil, errors.New("Failed to sign HUSH transaction!")
 		}
 		txIn.SignatureScript = script
 	}
@@ -741,7 +741,7 @@ func (w *ZcashdWallet) EstimateFee(ins []wallet.TransactionInput, outs []wallet.
 
 func (w *ZcashdWallet) EstimateSpendFee(amount int64, feeLevel wallet.FeeLevel) (uint64, error) {
 	<-w.initChan
-	addr, err := DecodeAddress("t1VpYecBW4UudbGcy4ufh61eWxQCoFaUrPs", &chaincfg.MainNetParams)
+	addr, err := DecodeAddress("RME8ineegyvc4dwGbeqh3isoU1UK4i2aP6", &chaincfg.MainNetParams)
 	if err != nil {
 		return 0, err
 	}
